@@ -6,9 +6,22 @@ from pathlib import Path
 # --- CONFIG ---
 DB_PATH = Path("data") / "crawler_data.json"  # relative path to repo root
 
+# Seed URLs used in the crawler
+SEED_URLS = [
+    "http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion",  # DuckDuckGo
+    "http://sanityunhavm6aolhyye4h6kbdlxjmc7zw2y7nadbni6vd43agm7xvid.onion",  # Tor mirror
+]
+
 # --- Page Setup ---
 st.set_page_config(page_title="Dark Web Threat Monitor", layout="wide")
 st.markdown("<h1 style='text-align: center; color: #E63946;'>🕵️‍♂️ Dark Web Threat Monitor</h1>", unsafe_allow_html=True)
+st.markdown("---")
+
+# --- Display Seed URLs ---
+st.markdown("### 🚀 Seed URLs used for crawling")
+for url in SEED_URLS:
+    st.markdown(f"- [{url}]({url})")
+
 st.markdown("---")
 
 # --- Load Data ---
