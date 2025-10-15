@@ -1,0 +1,10 @@
+services:
+  crawler:
+    build: .                       # build from your Dockerfile
+    container_name: darkweb_crawler
+    volumes:
+      - ./data:/app/data           # ✅ persist data locally in ./data
+    ports:
+      - "9050:9050"
+      - "9051:9051"
+    restart: unless-stopped

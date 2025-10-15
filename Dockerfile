@@ -1,30 +1,40 @@
 # Base image
 FROM python:3.11-slim
 
-# Install system dependencies + Tor
+# Create non-root user
+RUN useradd -m toruser
+
+# Install Tor and dependencies (optimized)
 RUN apt-get update && apt-get install -y \
-    build-essential \
+    tor \
     libffi-dev \
     libssl-dev \
-    libxml2-dev \
-    libxslt1-dev \
-    python3-dev \
-    cmake \
-    git \
-    tor \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
+# Set working directory
 WORKDIR /app
 
-# Copy requirements first
+# Ensure /app and /app/data are writable by toruser
+RUN mkdir -p /app/data && chown -R toruser:toruser /app/data
+
+# Copy Python requirements
 COPY requirements.txt .
 
-# Upgrade pip and install dependencies (including SOCKS support)
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
 
-# Start Tor + run your script
-CMD ["sh", "-c", "tor & sleep 15 && python crawler/test_tor.py"]
+# Copy torrc to system path
+RUN mkdir -p /etc/tor && cp torrc /etc/tor/torrc && chown -R toruser /etc/tor
+
+# Switch to non-root user
+USER toruser
+
+# Expose Tor ports
+EXPOSE 9050 9051
+
+# Start Tor and run crawler
+CMD ["sh", "-c", "tor & echo 'Waiting for Tor to bootstrap...' && sleep 15 && python crawler/crawler.py"]
